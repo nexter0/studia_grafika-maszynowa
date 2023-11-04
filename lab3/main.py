@@ -1,11 +1,11 @@
 import numpy as np
 from PIL import Image
 
-
 C: (int, int, int) = (0, 255, 255)
 M: (int, int, int) = (255, 0, 255)
 Y: (int, int, int) = (255, 255, 0)
 K: (int, int, int) = (0, 0, 0)
+
 
 def rysuj_pasy_pionowe_szare(width: int, height: int, grub: int) -> Image:
 
@@ -131,29 +131,92 @@ def generuj_ramki_cmyk(width: int, height: int, grub: int) -> Image:
     return Image.fromarray(obraz_arr)
 
 
-def negatyw_szare(obraz):
-    tab = np.asarray(obraz)
-    h, w = tab.shape
-    tab_neg = tab.copy()
+def gradient_red(image: Image) -> Image:
+    arr_origin = np.asarray(image)
+    print(arr_origin.shape)
+    h, w = arr_origin.shape
+    new_arr_size = (h, w, 3)
+    arr = np.ones(new_arr_size, dtype=np.uint8)
+    step_size = 255 // h  # Im mniejszy obraz tym szybciej zmieniaj kolor (aby cały obraz nie był czarny)
+    if step_size == 0:
+        step_size = 1
+    step = 0
+    color_switch = 0
     for i in range(h):
         for j in range(w):
-            tab_neg[i, j] = 255 - tab[i, j]
-    return tab_neg
+            if arr_origin[i, j] == False:
+                if color_switch % 3 == 0:
+                    arr[i, j] = [step, 0, 0]
+                elif color_switch % 3 == 1:
+                    arr[i, j] = [255, step, 0]
+                elif color_switch % 3 == 2:
+                    arr[i, j] = [255, 255, step]
+            else:
+                arr[i, j] = [255, 255, 255]
+        step += step_size
+        if step >= 255:
+            step = 0
+            color_switch += 1
 
-def negatyw_kolor(obraz):
-    tab = np.asarray(obraz)
-    h, w = tab.shape
-    tab_neg = tab.copy()
+    return Image.fromarray(arr)
+
+
+def negatyw(image: Image) -> Image:
+    arr = np.asarray(image)
+    h, w, rgb = arr.shape
+    arr_neg = arr.copy()
     for i in range(h):
         for j in range(w):
-            tab_neg[i, j] = 255 - tab[i, j]
-    return tab_neg
+            for k in range(rgb):
+                arr_neg[i, j, k] = 255 - arr[i, j, k]
+    return Image.fromarray(arr_neg)
 
-# image = rysuj_pasy_pionowe_szare(256, 256, 10)
-# image.show()
-# image = generuj_ramki_szare(256, 256, 10)
-# image.show()
-# image = rysuj_pasy_pionowe_cmyk(256, 256, 10)
-# image.show()
-# image = generuj_ramki_cmyk(256, 256, 10)
-# image.show()
+
+def koloruj_obraz(obraz, kolor):
+    t_obraz = np.asarray(obraz)
+    h, w = t_obraz.shape
+    t =(h, w, 3)
+    tab = np.ones(t, dtype=np.uint8)
+    for i in range(h):
+        for j in range(w):
+            if t_obraz[i, j] == False:
+                tab[i, j] = kolor
+            else:
+                tab[i, j] = [255, 255, 255]
+    return tab
+
+
+# image5 = Image.open("inicjaly.bmp")
+# image5_kolor = Image.fromarray(koloruj_obraz(image5, [-24, 0, 0]))
+# image5.show()
+
+image1 = rysuj_pasy_pionowe_szare(255, 255, 5)
+print(image1.mode)
+# image1_N = negatyw(image1)
+# image2 = generuj_ramki_szare(255, 255, 5)
+# image2_N = negatyw(image2)
+# image3 = rysuj_pasy_pionowe_cmyk(255, 255, 5)
+# image3_N = negatyw(image3)
+# image4 = gradient_red(Image.open("inicjaly.bmp"))
+# image6 = generuj_ramki_cmyk(255, 255, 5)
+# image6_N = negatyw(image6)
+
+# image1.save("obraz1_1.jpg")
+# image1_N.save("obraz1_1N.jpg")
+# image1.save("obraz1_1.png")
+# image1_N.save("obraz1_1N.png")
+# image2.save("obraz1_2.jpg")
+# image2_N.save("obraz1_2N.jpg")
+# image2.save("obraz1_2.png")
+# image2_N.save("obraz1_2N.png")
+# image3.save("obraz2_1.jpg")
+# image3_N.save("obraz2_1N.jpg")
+# image3.save("obraz2_1.png")
+# image3_N.save("obraz2_1N.png")
+
+
+# image6.save("obraz2_2.jpg")
+# image6_N.save("obraz2_2N.jpg")
+# image6.save("obraz2_2.png")
+# image6_N.save("obraz2_2N.png")
+

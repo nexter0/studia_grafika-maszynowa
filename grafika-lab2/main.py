@@ -156,7 +156,7 @@ def zad3_1() -> None:
 
 
 def zad3_2() -> None:
-    image = rysuj_pasy_pionowe(269, 350, 20)
+    image = rysuj_pasy_pionowe(250, 350, 20)
     image.show()
 
 
